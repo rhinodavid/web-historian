@@ -22,8 +22,8 @@ exports.handleRequest = function (req, res) {
       }
     });
   } else if (req.method === 'GET') {
-    // get the website URL the user is interested in ===> pathName
-    // convert to filepath
+    // TODO: check for sites.txt ===> if there, try to find file and retrieve,
+    // if not, 404
     filePath = path.join(archive.paths.archivedSites, pathName);
     // read file
     fs.readFile(filePath, function(err, data) {
@@ -34,6 +34,28 @@ exports.handleRequest = function (req, res) {
         res.statusCode = 200;
         res.end(data);
       }
+    });
+  } else if (req.method === 'POST') {
+    // get the post body url object
+    var body = [];
+    req.on('data', function(chunk) {
+      body.push(chunk);
+    });
+    req.on('end', function() {
+      body = body.join('');
+      body = archive.parseFormData(body);
+      // add body.url to sites.txt (archive.paths.list)
+      fs.appendFile(archive.paths.list, body.url + '\n', function(err) {
+        if (err) {
+          res.statusCode = 500;
+          res.end('Problem queueing site.');
+        } else {
+          res.writeHead(302, {
+            'Location': '/' + body.url
+          });
+          res.end();
+        }
+      });
     });
   }
   // res.end(archive.paths.list);
