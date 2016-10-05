@@ -40,3 +40,15 @@ exports.isUrlArchived = function() {
 
 exports.downloadUrls = function() {
 };
+
+exports.parseFormData = function(formData) {
+  formData = formData.split('&');
+  formData = formData.map(function(pair) {
+    return pair.split('=');
+  });
+  var result = {};
+  formData.forEach(function(pair) {
+    result[pair[0]] = pair[1];
+  });
+  return result;
+};
