@@ -36,7 +36,10 @@ exports.readListOfUrls = function(cb) {
   });
 };
 
-exports.isUrlInList = function() {
+exports.isUrlInList = function(url, cb) {
+  exports.readListOfUrls(function(urls) {
+    urls.indexOf(url) === -1 ? cb(false) : cb(true);
+  });
 };
 
 exports.addUrlToList = function() {
