@@ -42,10 +42,30 @@ exports.isUrlInList = function(url, cb) {
   });
 };
 
-exports.addUrlToList = function() {
+exports.addUrlToList = function(url, cb) {
+  exports.isUrlInList(url, function(exists) {
+    if (exists) {
+      cb(null);
+    } else {
+      fs.appendFile(exports.paths.list, url + '\n', function(err) {
+        if (err) {
+          cb(new Error('Error queuing site.'));
+        } else {
+          cb(null);
+        }
+      });
+    }
+  });
 };
 
-exports.isUrlArchived = function() {
+exports.isUrlArchived = function(url, cb) {
+  fs.access(path.join(exports.paths.archivedSites, url), fs.R_OK, function(err) {
+    if (err) {
+      cb(false);
+    } else {
+      cb(true);
+    }
+  });
 };
 
 exports.downloadUrls = function() {
