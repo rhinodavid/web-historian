@@ -5,6 +5,7 @@ var archive = require('../helpers/archive-helpers');
 var path = require('path');
 var supertest = require('supertest');
 var initialize = require('../web/initialize.js');
+var Promise = require('bluebird');
 
 initialize(path.join(__dirname, '/testdata'));
 
@@ -108,6 +109,21 @@ describe('archive helpers', function() {
     });
   });
 
+  describe('#readListOfUrlsAsync', function() {
+    it('should return a bluebird promise', function() {
+      expect(archive.readListOfUrlsAsync()).to.be.an.instanceOf(Promise);
+    });
+    it('should read urls from sites.txt', function(done) {
+      var urlArray = ['example1.com', 'example2.com'];
+      fs.writeFileSync(archive.paths.list, urlArray.join('\n'));
+
+      archive.readListOfUrlsAsync().then(function(urls) {
+        expect(urls).to.deep.equal(urlArray);
+        done();
+      }).catch(done);
+    });
+  });
+
   describe('#isUrlInList', function () {
     it('should check if a url is in the list', function (done) {
       var urlArray = ['example1.com', 'example2.com'];
@@ -139,6 +155,22 @@ describe('archive helpers', function() {
           done();
         });
       });
+    });
+  });
+
+  describe('#addUrlToListAsync', function() {
+    it('should add a url to sites.txt', function(done) {
+      var urlArray = ['example1.com', 'example2.com\n'];
+      fs.writeFileSync(archive.paths.list, urlArray.join('\n'));
+
+      archive.addUrlToListAsync('www.randomurl.com')
+      .then(function() {
+        archive.isUrlInListAsync('www.randomurl.com')
+        .then(function(exists) {
+          expect(exists).to.equal(true);
+          done();
+        });
+      }).catch(done);
     });
   });
 
