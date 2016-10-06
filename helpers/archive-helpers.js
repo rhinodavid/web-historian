@@ -87,7 +87,23 @@ exports.downloadUrl = function(url) {
   });
 };
 
-exports.downloadUrls = function() {
+exports.downloadUrls = function(urls) {
+  // go into sites.txt
+  urls.forEach(function(url) {
+    exports.isUrlArchived(url, function(exists) {
+      if (!exists) {
+        exports.downloadUrl(url);
+      }
+    });
+  });
+};
+
+exports.clearSitesList = function() {
+  fs.writeFile(exports.paths.list, '', function(err) {
+    if (err) {
+      console.log('Error clearing out sites.txt:', err);
+    }
+  });
 };
 
 exports.parseFormData = function(formData) {
