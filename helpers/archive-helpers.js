@@ -1,5 +1,7 @@
 var fs = require('fs');
+var http = require('http');
 var path = require('path');
+var URL = require('url');
 var _ = require('underscore');
 
 /*
@@ -65,6 +67,23 @@ exports.isUrlArchived = function(url, cb) {
     } else {
       cb(true);
     }
+  });
+};
+
+exports.downloadUrl = function(url) {
+  var req = http.get('http://' + url, function(res) {
+    // on success, save page contents as 'url' in sites folder
+    fs.writeFile(path.join(exports.paths.archivedSites, url), '', function(err) {
+      if (err) {
+        return;
+      } else {
+        var wStream = fs.createWriteStream(path.join(exports.paths.archivedSites, url));
+        res.on('end', function() {
+          wStream.end();
+        });
+        res.pipe(wStream);
+      }
+    });
   });
 };
 
