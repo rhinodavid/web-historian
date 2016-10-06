@@ -3,6 +3,7 @@ var http = require('http');
 var path = require('path');
 var URL = require('url');
 var _ = require('underscore');
+var Promise = require('bluebird');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -25,16 +26,29 @@ exports.initialize = function(pathsObj) {
   });
 };
 
+
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(cb) {
   fs.readFile(exports.paths.list, 'utf-8', function(err, data) {
     if (err) {
-      cb(null);
+      cb(err);
     } else {
       cb(data.split('\n'));
     }
+  });
+};
+
+exports.readListOfUrlsAsync = () => {
+  return new Promise((resolve, reject) => {
+    exports.readListOfUrls((result) => {
+      if (result instanceof Error) {
+        reject(result);
+      } else {
+        resolve(result);
+      }
+    });
   });
 };
 
@@ -42,6 +56,12 @@ exports.isUrlInList = function(url, cb) {
   url = exports.removeLeadingSlash(url);
   exports.readListOfUrls(function(urls) {
     urls.indexOf(url) === -1 ? cb(false) : cb(true);
+  });
+};
+
+exports.isUrlInListAsync = (url) => {
+  return new Promise((resolve) => {
+    exports.isUrlInList(url, result => resolve(result)); 
   });
 };
 
@@ -72,6 +92,8 @@ exports.addUrlToList = function(url, cb) {
   });
 };
 
+exports.addUrlToListAsync = Promise.promisify(exports.addUrlToList);
+
 exports.isUrlArchived = function(url, cb) {
   fs.access(path.join(exports.paths.archivedSites, url), fs.R_OK, function(err) {
     if (err) {
@@ -79,6 +101,12 @@ exports.isUrlArchived = function(url, cb) {
     } else {
       cb(true);
     }
+  });
+};
+
+exports.isUrlArchivedAsync = (url) => {
+  return new Promise((resolve) => {
+    exports.isUrlArchived(url, (result) => resolve(result));
   });
 };
 
