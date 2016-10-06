@@ -26,17 +26,33 @@ exports.handleRequest = function (req, res) {
     // if not, 404
     filePath = path.join(archive.paths.archivedSites, pathName);
     // read file
-    fs.readFile(filePath, function(err, data) {
-      if (err) {
-        res.statusCode = 404;
-        res.end('File not found.');
+
+    archive.isUrlArchived(pathName, function(exists) {
+      if (exists) {
+        fs.readFile(filePath, function(err, data) {
+          if (err) {
+            res.statusCode = 500;
+            res.end('Server Error. Could not read file.');
+          } else {
+            res.statusCode = 200;
+            res.end(data);
+          }
+        });
+
       } else {
-        res.statusCode = 200;
-        res.end(data);
+        archive.isUrlInList(pathName, function(exists) {
+          if (exists) {
+            res.statusCode = 200;
+            res.end('Currently archiving site. Try again later.');
+          } else {
+            res.statusCode = 404;
+            res.end('File not found. Use submit to add to archive.');
+          }
+        });
       }
     });
+
   } else if (req.method === 'POST') {
-    // get the post body url object
     var body = [];
     req.on('data', function(chunk) {
       body.push(chunk);
@@ -45,7 +61,7 @@ exports.handleRequest = function (req, res) {
       body = body.join('');
       body = archive.parseFormData(body);
       // add body.url to sites.txt (archive.paths.list)
-      fs.appendFile(archive.paths.list, body.url + '\n', function(err) {
+      archive.addUrlToList(body.url, function(err) {
         if (err) {
           res.statusCode = 500;
           res.end('Problem queueing site.');
@@ -58,5 +74,4 @@ exports.handleRequest = function (req, res) {
       });
     });
   }
-  // res.end(archive.paths.list);
 };
