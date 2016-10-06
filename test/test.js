@@ -163,7 +163,7 @@ describe('archive helpers', function() {
 
   describe('#downloadUrl', function () {
     it('should download a url given to it', function(done) {
-      var url = 'www.amazon.com';
+      var url = 'www.example.com';
       archive.downloadUrl(url);
 
       setTimeout(function() {
