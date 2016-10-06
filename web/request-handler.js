@@ -36,7 +36,8 @@ exports.handleRequest = function (req, res) {
       } else {
         return archive.isUrlInListAsync(pathName);
       }
-    }).then(function(result) {
+    })
+    .then(function(result) {
       if (typeof result === 'boolean') {
         // got back t/f
         if (result) {
@@ -51,7 +52,8 @@ exports.handleRequest = function (req, res) {
         res.statusCode = 200;
         res.end(result);
       }
-    }).catch(function(err) {
+    })
+    .catch(function(err) {
       res.statusCode = 500;
       res.end('There was a problem processing your request.');
     });
@@ -65,16 +67,17 @@ exports.handleRequest = function (req, res) {
       body = body.join('');
       body = archive.parseFormData(body);
       // add body.url to sites.txt (archive.paths.list)
-      archive.addUrlToList(body.url, function(err) {
-        if (err) {
-          res.statusCode = 500;
-          res.end('Problem queueing site.');
-        } else {
-          res.writeHead(302, {
-            'Location': '/' + body.url
-          });
-          res.end();
-        }
+      
+      archive.addUrlToListAsync(body.url)
+      .then(function() {
+        res.writeHead(302, {
+          'Location': '/' + body.url
+        });
+        res.end();
+      })
+      .catch(function(err) {
+        res.statusCode = 500;
+        res.end('Problem queueing site.');
       });
     });
   }
