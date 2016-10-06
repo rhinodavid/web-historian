@@ -142,6 +142,18 @@ describe('archive helpers', function() {
     });
   });
 
+  describe('#downloadUrl', function () {
+    it('should download a url given to it', function(done) {
+      var url = 'www.example.com';
+      archive.downloadUrl(url);
+
+      setTimeout(function() {
+        expect(fs.readdirSync(archive.paths.archivedSites)).to.include(url);
+        done();
+      }, 1000);
+    });
+  });
+
   describe('#downloadUrls', function () {
     it('should download all pending urls in the list', function (done) {
       var urlArray = ['www.example.com', 'www.google.com'];
