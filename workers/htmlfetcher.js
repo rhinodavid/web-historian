@@ -4,7 +4,7 @@
 var archive = require('../helpers/archive-helpers');
 
 archive.readListOfUrls(function(urls) {
-  if (urls) {
+  if (urls && !(urls instanceof Error)) {
     urls.forEach(function(url) {
       if (url !== '') {
         archive.downloadUrl(url);
