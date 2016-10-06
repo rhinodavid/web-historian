@@ -13,7 +13,26 @@ archive.initialize({
   list: path.join(__dirname, '/testdata/sites.txt')
 });
 
+var emptyFolderRecursive = function(path) {
+  // from: http://stackoverflow.com/questions/18052762/remove-directory-which-is-not-empty
+  if (fs.existsSync(path)) {
+    fs.readdirSync(path).forEach(function(file, index) {
+      var curPath = path + '/' + file;
+      if (fs.lstatSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    // fs.rmdirSync(path);
+  }
+};
+
 var request = supertest.agent(server);
+
+beforeEach(function() {
+  emptyFolderRecursive(archive.paths.archivedSites);
+});
 
 describe('server', function() {
   describe('GET /', function () {
@@ -144,17 +163,19 @@ describe('archive helpers', function() {
 
   describe('#downloadUrl', function () {
     it('should download a url given to it', function(done) {
-      var url = 'www.example.com';
+      var url = 'www.amazon.com';
       archive.downloadUrl(url);
 
       setTimeout(function() {
         expect(fs.readdirSync(archive.paths.archivedSites)).to.include(url);
         done();
-      }, 1000);
+      }, 250);
     });
   });
 
+
   describe('#downloadUrls', function () {
+
     it('should download all pending urls in the list', function (done) {
       var urlArray = ['www.example.com', 'www.google.com'];
       archive.downloadUrls(urlArray);
