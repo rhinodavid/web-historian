@@ -39,9 +39,17 @@ exports.readListOfUrls = function(cb) {
 };
 
 exports.isUrlInList = function(url, cb) {
+  url = exports.removeLeadingSlash(url);
   exports.readListOfUrls(function(urls) {
     urls.indexOf(url) === -1 ? cb(false) : cb(true);
   });
+};
+
+exports.removeLeadingSlash = function(url) {
+  if (url.charAt(0) === '/') {
+    url = url.slice(1);
+  }
+  return url;
 };
 
 exports.addUrlToList = function(url, cb) {
