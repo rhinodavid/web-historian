@@ -46,10 +46,14 @@ exports.isUrlInList = function(url, cb) {
 };
 
 exports.removeLeadingSlash = function(url) {
-  if (url.charAt(0) === '/') {
-    url = url.slice(1);
+  try {
+    if (url.charAt(0) === '/') {
+      url = url.slice(1);
+    }
+    return url;
+  } catch (e) {
+    return null;
   }
-  return url;
 };
 
 exports.addUrlToList = function(url, cb) {
@@ -79,7 +83,16 @@ exports.isUrlArchived = function(url, cb) {
 };
 
 exports.downloadUrl = function(url) {
-  var req = http.get('http://' + url, function(res) {
+  var options = {
+    protocol: 'http:',
+    hostname: url,
+    headers: {
+      'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) \
+        AppleWebKit/537.36 (KHTML, like Gecko) \
+        Chrome/53.0.2785.143 Safari/537.36'
+    }
+  };
+  var req = http.get(options, function(res) {
     // on success, save page contents as 'url' in sites folder
     fs.writeFile(path.join(exports.paths.archivedSites, url), '', function(err) {
       if (err) {
